@@ -1,0 +1,46 @@
+{
+  "name": "@cloudworxx/tauri-plugin-mac-rounded-corners",
+  "version": "1.0.0",
+  "description": "Tauri v2 plugin for native macOS rounded corners with customizable Traffic Lights positioning. App Store compatible, uses only public APIs.",
+  "main": "index.ts",
+  "types": "index.ts",
+  "keywords": [
+    "tauri",
+    "tauri-plugin",
+    "tauri-v2",
+    "macos",
+    "rounded-corners",
+    "traffic-lights",
+    "frameless-window",
+    "window-decorations",
+    "app-store",
+    "cocoa"
+  ],
+  "author": {
+    "name": "Sascha Klein",
+    "email": "hello@cloudworxx.us",
+    "url": "https://cloudworxx.us"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cloudworxx/tauri-plugin-mac-rounded-corners"
+  },
+  "bugs": {
+    "url": "https://github.com/cloudworxx/tauri-plugin-mac-rounded-corners/issues"
+  },
+  "homepage": "https://github.com/cloudworxx/tauri-plugin-mac-rounded-corners#readme",
+  "peerDependencies": {
+    "@tauri-apps/api": "^2"
+  },
+  "files": [
+    "mod.rs",
+    "index.ts",
+    "README.md",
+    "INTEGRATION.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
