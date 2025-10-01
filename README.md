@@ -202,21 +202,21 @@ Enables modern window style with rounded corners, shadow, and layer-based clippi
 
 ## Tauri Configuration
 
-Ensure your `tauri.conf.json` has:
+Ensure your `tauri.conf.json` has decorations disabled:
 
 ```json
 {
   "tauri": {
     "windows": [
       {
-        "decorations": false,
-        "transparent": true,
-        "titleBarStyle": "Overlay"
+        "decorations": false
       }
     ]
   }
 }
 ```
+
+**Important:** Do NOT set `transparent: true` - this plugin provides rounded corners without requiring the transparency API, making it more reliable and App Store compatible.
 
 ## Platform Support
 
@@ -299,6 +299,9 @@ A: The commands are no-ops on non-macOS platforms, so your app won't crash, but 
 
 **Q: Can I customize the corner radius?**  
 A: Yes! Use the `cornerRadius` parameter in `enableModernWindowStyle()`.
+
+**Q: Do I need `transparent: true` in tauri.conf.json?**  
+A: No! This plugin works without the transparency API, which makes it more reliable and avoids potential App Store issues.
 
 **Q: Is this free?**  
 A: Yes! MIT licensed - free for personal and commercial use.
