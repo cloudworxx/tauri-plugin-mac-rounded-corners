@@ -278,7 +278,7 @@ On non-macOS platforms, the plugin commands are no-ops and won't throw errors.
 
 ## Changelog
 
-### v1.0.0 (2025-01-XX)
+### v1.0.0 (2025-10-01)
 - Initial release
 - Basic rounded corners support
 - Modern window style with shadow
@@ -320,7 +320,7 @@ Copyright (c) 2025 Sascha Klein (cloudworxx.us)
 
 ## Credits
 
-Created for [PromptDeck](https://github.com/cloudworxx/promptdeck) - A Tauri v2 desktop application.
+Created for [PromptDeck](https://getpromptdeck.com).
 
 ## Contributing
 
