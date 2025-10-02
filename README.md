@@ -3,6 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Tauri](https://img.shields.io/badge/Tauri-v2-blue)](https://tauri.app/)
 [![macOS](https://img.shields.io/badge/macOS-compatible-green)](https://www.apple.com/macos/)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue)](https://github.com/cloudworxx/tauri-plugin-mac-rounded-corners)
 
 A reusable Tauri plugin that enables native macOS rounded corners with customizable Traffic Lights positioning for frameless windows.
 
@@ -16,6 +17,7 @@ Email: [hello@cloudworxx.us](mailto:hello@cloudworxx.us)
 
 - ✅ **Rounded corners** (12px default, customizable)
 - ✅ **Traffic Lights positioning** (Close, Minimize, Maximize buttons)
+- ✅ **Auto-reposition after fullscreen** (NEW in v1.1.0)
 - ✅ **App Store compatible** - Uses only public macOS APIs
 - ✅ **Custom titlebar support** - Full-size content view
 - ✅ **Native shadows** - Optional shadow effects
@@ -24,27 +26,25 @@ Email: [hello@cloudworxx.us](mailto:hello@cloudworxx.us)
 - ✅ **Zero runtime dependencies**
 - ✅ **MIT Licensed** - Free for personal and commercial use
 
-## Screenshots
+## What's New in v1.1.0
 
-| Before | After |
-|--------|-------|
-| Standard frameless window | Beautiful rounded corners with positioned Traffic Lights |
+- **Auto-reposition**: Traffic Lights automatically reposition after fullscreen exit
+- **New command**: `reposition_traffic_lights()` for manual control
+- **Event-based**: Uses `onResized` listener for instant repositioning
+- **Bug fixes**: Close button now works correctly, fullscreen positioning fixed
 
 ## Installation
 
 ### 1. Copy Rust Code
 
-Copy the `mod.rs` file to your Tauri project:
-
 ```bash
-# From your project root
 mkdir -p src-tauri/src/plugins
-cp _PLUGIN/mac-rounded-corners/mod.rs src-tauri/src/plugins/mac_rounded_corners.rs
+cp mod.rs src-tauri/src/plugins/mac_rounded_corners.rs
 ```
 
 ### 2. Add Dependencies
 
-Add to your `src-tauri/Cargo.toml`:
+Add to `src-tauri/Cargo.toml`:
 
 ```toml
 [target.'cfg(target_os = "macos")'.dependencies]
@@ -52,7 +52,7 @@ cocoa = "0.26"
 objc = "0.2.7"
 ```
 
-### 3. Register Plugin
+### 3. Register Commands
 
 In `src-tauri/src/lib.rs`:
 
@@ -64,7 +64,8 @@ pub fn run() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             mac_rounded_corners::enable_rounded_corners,
-            mac_rounded_corners::enable_modern_window_style
+            mac_rounded_corners::enable_modern_window_style,
+            mac_rounded_corners::reposition_traffic_lights  // NEW in v1.1.0
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -77,13 +78,36 @@ Create `src-tauri/src/plugins/mod.rs`:
 pub mod mac_rounded_corners;
 ```
 
-### 4. Copy TypeScript Code
+### 4. Add Required Permissions
 
-Copy the TypeScript wrapper to your frontend:
+**IMPORTANT**: Add these permissions to `tauri.conf.json`:
+
+```json
+{
+  "app": {
+    "security": {
+      "capabilities": [
+        {
+          "identifier": "main-capability",
+          "windows": ["*"],
+          "permissions": [
+            "core:window:allow-start-dragging",
+            "core:window:allow-is-fullscreen",
+            "core:window:allow-is-maximized",
+            "core:event:allow-listen"
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+
+### 5. Copy TypeScript Code
 
 ```bash
 mkdir -p src/lib
-cp _PLUGIN/mac-rounded-corners/index.ts src/lib/mac-rounded-corners.ts
+cp index.ts src/lib/mac-rounded-corners.ts
 ```
 
 ## Usage
@@ -97,6 +121,7 @@ import { enableModernWindowStyle } from './lib/mac-rounded-corners';
 function App() {
   useEffect(() => {
     // Enable rounded corners on mount
+    // Auto-repositioning after fullscreen is enabled automatically
     enableModernWindowStyle();
   }, []);
 
@@ -115,6 +140,15 @@ await enableModernWindowStyle({
   offsetX: 5,            // Move Traffic Lights 5px right
   offsetY: 10,           // Move Traffic Lights 10px down
 });
+```
+
+### Manual Repositioning
+
+```typescript
+import { repositionTrafficLights } from './lib/mac-rounded-corners';
+
+// Manually reposition Traffic Lights (useful after window state changes)
+await repositionTrafficLights();
 ```
 
 ### Simple Mode (No Shadow)
@@ -200,6 +234,18 @@ Enables modern window style with rounded corners, shadow, and layer-based clippi
 
 **Returns:** `Promise<void>`
 
+### `repositionTrafficLights()` ✨ NEW
+
+Manually repositions Traffic Lights to their configured position. Useful if you need to manually trigger repositioning.
+
+**Returns:** `Promise<void>`
+
+### `cleanupRoundedCorners()` ✨ NEW
+
+Cleanup function to remove event listeners. Call when component unmounts.
+
+**Returns:** `void`
+
 ## Tauri Configuration
 
 Ensure your `tauri.conf.json` has decorations disabled:
@@ -225,10 +271,19 @@ Ensure your `tauri.conf.json` has decorations disabled:
 | Rounded Corners | ✅ | ❌ | ❌ |
 | Traffic Lights | ✅ (native) | N/A | N/A |
 | Shadow | ✅ (native) | ✅ | ✅ |
+| Auto-reposition | ✅ | N/A | N/A |
 
 On non-macOS platforms, the plugin commands are no-ops and won't throw errors.
 
 ## Troubleshooting
+
+### Traffic Lights not repositioning after fullscreen
+
+**Solution:** Ensure you have the required permissions in `tauri.conf.json`:
+```json
+"core:window:allow-is-fullscreen",
+"core:event:allow-listen"
+```
 
 ### Traffic Lights not clickable
 
@@ -244,8 +299,12 @@ On non-macOS platforms, the plugin commands are no-ops and won't throw errors.
 
 ### Close button disabled
 
-- This is fixed in the plugin (adds `NSClosableWindowMask`)
+- This is fixed in v1.1.0 (adds `NSClosableWindowMask`)
 - Make sure you're using the latest version
+
+### Permission errors in console
+
+Add all required permissions to `tauri.conf.json` (see Installation step 4)
 
 ## Technical Details
 
@@ -258,8 +317,13 @@ On non-macOS platforms, the plugin commands are no-ops and won't throw errors.
 - `setHasShadow`
 - `CALayer.setCornerRadius`
 - `setMasksToBounds`
+- `standardWindowButton` (for repositioning)
 
 **No private APIs** are used - fully App Store compliant.
+
+### How Auto-Reposition Works
+
+The plugin uses Tauri's `onResized` event listener to detect when the window exits fullscreen mode. When this event fires, it immediately calls `repositionTrafficLights()` to restore the custom position. This is event-based and instant (~0-50ms), not polling-based.
 
 ### Why this works
 
@@ -268,6 +332,7 @@ On non-macOS platforms, the plugin commands are no-ops and won't throw errors.
 3. Layer-based corner radius clips the content
 4. Style masks enable Traffic Light functionality
 5. Frame manipulation positions the buttons
+6. Event listener repositions after state changes
 
 ## Requirements
 
@@ -278,13 +343,19 @@ On non-macOS platforms, the plugin commands are no-ops and won't throw errors.
 
 ## Changelog
 
-### v1.0.0 (2025-10-01)
+See [CHANGELOG.md](CHANGELOG.md) for detailed version history.
+
+### Recent Changes
+
+**v1.1.0** (2025-01-02)
+- Added auto-reposition feature for Traffic Lights after fullscreen
+- New `reposition_traffic_lights()` command
+- Event-based resize listener
+- Fixed Close button not working
+- Added required permissions documentation
+
+**v1.0.0** (2025-01-02)
 - Initial release
-- Basic rounded corners support
-- Modern window style with shadow
-- Customizable Traffic Lights positioning
-- TypeScript support
-- Full documentation
 
 ## FAQ
 
@@ -303,6 +374,9 @@ A: Yes! Use the `cornerRadius` parameter in `enableModernWindowStyle()`.
 **Q: Do I need `transparent: true` in tauri.conf.json?**  
 A: No! This plugin works without the transparency API, which makes it more reliable and avoids potential App Store issues.
 
+**Q: Why do Traffic Lights reset position after fullscreen?**  
+A: macOS resets custom button positions during fullscreen transitions. v1.1.0 automatically fixes this with event-based repositioning.
+
 **Q: Is this free?**  
 A: Yes! MIT licensed - free for personal and commercial use.
 
@@ -320,7 +394,7 @@ Copyright (c) 2025 Sascha Klein (cloudworxx.us)
 
 ## Credits
 
-Created for [PromptDeck](https://getpromptdeck.com).
+Created for [PromptDeck](https://github.com/cloudworxx/promptdeck) - A Tauri v2 desktop application.
 
 ## Contributing
 

@@ -1,3 +1,7 @@
+// Unterdrücke Warnings von veralteten Cocoa APIs
+#![allow(unexpected_cfgs)]
+#![allow(deprecated)]
+
 use tauri::{AppHandle, Runtime, WebviewWindow};
 
 #[cfg(target_os = "macos")]
@@ -124,6 +128,40 @@ pub fn enable_modern_window_style<R: Runtime>(
                         let _: () = msg_send![layer, setMasksToBounds: cocoa::base::YES];
                     }
                     
+                    position_traffic_lights(ns_window, config.offset_x, config.offset_y);
+                }
+            })
+            .map_err(|e| e.to_string())?;
+        
+        Ok(())
+    }
+    
+    #[cfg(not(target_os = "macos"))]
+    {
+        Ok(())
+    }
+}
+
+/// Repositions Traffic Lights only (useful after fullscreen toggle)
+#[tauri::command]
+pub fn reposition_traffic_lights<R: Runtime>(
+    _app: AppHandle<R>,
+    window: WebviewWindow<R>,
+    offset_x: Option<f64>,
+    offset_y: Option<f64>,
+) -> Result<(), String> {
+    #[cfg(target_os = "macos")]
+    {
+        let config = TrafficLightsConfig {
+            offset_x: offset_x.unwrap_or(0.0),
+            offset_y: offset_y.unwrap_or(0.0),
+        };
+
+        window
+            .with_webview(move |webview| {
+                #[cfg(target_os = "macos")]
+                unsafe {
+                    let ns_window = webview.ns_window() as id;
                     position_traffic_lights(ns_window, config.offset_x, config.offset_y);
                 }
             })
