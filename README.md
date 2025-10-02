@@ -35,14 +35,82 @@ Email: [hello@cloudworxx.us](mailto:hello@cloudworxx.us)
 
 ## Installation
 
-### 1. Copy Rust Code
+There are two ways to install this plugin: **automatic** (recommended) or **manual**.
+
+### Option A: Automatic Installation (Recommended)
+
+The plugin includes an automatic installer that copies files and updates your project configuration.
+
+#### 1. Install the package
+
+```bash
+npm install @cloudworxx/tauri-plugin-mac-rounded-corners
+```
+
+The `postinstall` script automatically:
+- ✅ Copies `mod.rs` to `src-tauri/src/plugins/mac_rounded_corners.rs`
+- ✅ Creates/updates `src-tauri/src/plugins/mod.rs`
+
+#### 2. Complete the setup
+
+You still need to manually add:
+
+**a) Dependencies to `src-tauri/Cargo.toml`:**
+```toml
+[target.'cfg(target_os = "macos")'.dependencies]
+cocoa = "0.26"
+objc = "0.2.7"
+```
+
+**b) Commands in `src-tauri/src/lib.rs`:**
+```rust
+mod plugins;
+use plugins::mac_rounded_corners;
+
+pub fn run() {
+    tauri::Builder::default()
+        .invoke_handler(tauri::generate_handler![
+            mac_rounded_corners::enable_rounded_corners,
+            mac_rounded_corners::enable_modern_window_style,
+            mac_rounded_corners::reposition_traffic_lights
+        ])
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
+}
+```
+
+**c) Permissions to `tauri.conf.json`:**
+```json
+{
+  "app": {
+    "security": {
+      "capabilities": [
+        {
+          "identifier": "main-capability",
+          "windows": ["*"],
+          "permissions": [
+            "core:window:allow-start-dragging",
+            "core:window:allow-is-fullscreen",
+            "core:window:allow-is-maximized",
+            "core:event:allow-listen"
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+
+### Option B: Manual Installation
+
+#### 1. Copy Rust Code
 
 ```bash
 mkdir -p src-tauri/src/plugins
 cp mod.rs src-tauri/src/plugins/mac_rounded_corners.rs
 ```
 
-### 2. Add Dependencies
+#### 2. Add Dependencies
 
 Add to `src-tauri/Cargo.toml`:
 
@@ -52,7 +120,7 @@ cocoa = "0.26"
 objc = "0.2.7"
 ```
 
-### 3. Register Commands
+#### 3. Register Commands
 
 In `src-tauri/src/lib.rs`:
 
@@ -78,7 +146,7 @@ Create `src-tauri/src/plugins/mod.rs`:
 pub mod mac_rounded_corners;
 ```
 
-### 4. Add Required Permissions
+#### 4. Add Required Permissions
 
 **IMPORTANT**: Add these permissions to `tauri.conf.json`:
 
@@ -103,20 +171,33 @@ pub mod mac_rounded_corners;
 }
 ```
 
-### 5. Copy TypeScript Code
+#### 5. Import TypeScript Functions
 
+**Option 1: Use from npm package (recommended)**
+```typescript
+import { enableModernWindowStyle } from '@cloudworxx/tauri-plugin-mac-rounded-corners';
+```
+
+**Option 2: Copy TypeScript file locally**
 ```bash
 mkdir -p src/lib
-cp index.ts src/lib/mac-rounded-corners.ts
+cp node_modules/@cloudworxx/tauri-plugin-mac-rounded-corners/index.ts src/lib/mac-rounded-corners.ts
+```
+
+Then import from local file:
+```typescript
+import { enableModernWindowStyle } from './lib/mac-rounded-corners';
 ```
 
 ## Usage
 
 ### Basic Usage
 
+**After npm installation:**
+
 ```typescript
 import { useEffect } from 'react';
-import { enableModernWindowStyle } from './lib/mac-rounded-corners';
+import { enableModernWindowStyle } from '@cloudworxx/tauri-plugin-mac-rounded-corners';
 
 function App() {
   useEffect(() => {
@@ -132,7 +213,7 @@ function App() {
 ### With Custom Configuration
 
 ```typescript
-import { enableModernWindowStyle } from './lib/mac-rounded-corners';
+import { enableModernWindowStyle } from '@cloudworxx/tauri-plugin-mac-rounded-corners';
 
 // Custom corner radius and Traffic Lights position
 await enableModernWindowStyle({
@@ -145,7 +226,7 @@ await enableModernWindowStyle({
 ### Manual Repositioning
 
 ```typescript
-import { repositionTrafficLights } from './lib/mac-rounded-corners';
+import { repositionTrafficLights } from '@cloudworxx/tauri-plugin-mac-rounded-corners';
 
 // Manually reposition Traffic Lights (useful after window state changes)
 await repositionTrafficLights();
@@ -154,7 +235,7 @@ await repositionTrafficLights();
 ### Simple Mode (No Shadow)
 
 ```typescript
-import { enableRoundedCorners } from './lib/mac-rounded-corners';
+import { enableRoundedCorners } from '@cloudworxx/tauri-plugin-mac-rounded-corners';
 
 // Simpler version without shadow and layer-based clipping
 await enableRoundedCorners({
@@ -394,7 +475,7 @@ Copyright (c) 2025 Sascha Klein (cloudworxx.us)
 
 ## Credits
 
-Created for [PromptDeck](https://github.com/cloudworxx/promptdeck) - A Tauri v2 desktop application.
+Created for [PromptDeck](https://getpromptdeck.com)
 
 ## Contributing
 
@@ -412,4 +493,4 @@ If you find this plugin useful, please consider giving it a ⭐ on GitHub!
 
 ---
 
-Made with ❤️ by [Sascha Klein](https://cloudworxx.us)
+Made with ❤️ by Sascha Klein (cloudworxx.us)
