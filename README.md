@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Tauri](https://img.shields.io/badge/Tauri-v2-blue)](https://tauri.app/)
 [![macOS](https://img.shields.io/badge/macOS-compatible-green)](https://www.apple.com/macos/)
-[![Version](https://img.shields.io/badge/version-1.1.0-blue)](https://github.com/cloudworxx/tauri-plugin-mac-rounded-corners)
+[![Version](https://img.shields.io/badge/version-1.1.1-blue)](https://github.com/cloudworxx/tauri-plugin-mac-rounded-corners)
 
 A reusable Tauri plugin that enables native macOS rounded corners with customizable Traffic Lights positioning for frameless windows.
 
